@@ -9,6 +9,15 @@ const DEFAULT_TWEAKS = {
   "Memory-5wiMl": {}
 };
 
+// Clean the response text by removing prefixes
+function cleanResponse(text: string): string {
+  return text
+    .replace(/^(User:|AI:)\s*/i, '') // Remove "User:" or "AI:" from start
+    .replace(/^what is a\s+/i, '') // Remove "what is a" from start
+    .replace(/^how do i\s+/i, '') // Remove "how do i" from start
+    .trim();
+}
+
 if (!process.env.LANGFLOW_BASE_URL) throw new Error('LANGFLOW_BASE_URL is not defined');
 if (!process.env.LANGFLOW_ID) throw new Error('LANGFLOW_ID is not defined');
 if (!process.env.FLOW_ID) throw new Error('FLOW_ID is not defined');
@@ -45,9 +54,12 @@ export async function POST(request: Request) {
     const data = await response.json();
     
     // Extract the message from the response
-    const message = data?.outputs?.[0]?.outputs?.[0]?.results?.message?.text || 
-                   data?.outputs?.[0]?.outputs?.[0]?.artifacts?.message ||
-                   'No response from the assistant';
+    let message = data?.outputs?.[0]?.outputs?.[0]?.results?.message?.text || 
+                 data?.outputs?.[0]?.outputs?.[0]?.artifacts?.message ||
+                 'No response from the assistant';
+
+    // Clean the response
+    message = cleanResponse(message);
 
     return NextResponse.json({
       result: message,
