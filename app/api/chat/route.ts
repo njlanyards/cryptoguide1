@@ -9,12 +9,24 @@ const DEFAULT_TWEAKS = {
   "Memory-5wiMl": {}
 };
 
-// Clean the response text by removing prefixes
+// Clean the response text by removing all AI-related prefixes and formatting
 function cleanResponse(text: string): string {
-  return text
-    .replace(/^(User:|AI:)\s*/i, '') // Remove "User:" or "AI:" from start
-    .replace(/^what is a\s+/i, '') // Remove "what is a" from start
-    .replace(/^how do i\s+/i, '') // Remove "how do i" from start
+  // Remove common prefixes and patterns
+  const cleanedText = text
+    // Remove any variation of AI/Assistant/Bot responses
+    .replace(/^(AI:|Assistant:|Bot:)\s*/i, '')
+    .replace(/\??\s*AI:?\s*/g, '')
+    // Remove question echoing
+    .replace(/^(User:?|Human:?|Q:?)\s*.+\?\s*/i, '')
+    // Remove common question prefixes that might be echoed
+    .replace(/^(what is|what are|what's|how do i|how to|tell me about|explain)\s+/i, '')
+    // Remove any remaining colons at the start
+    .replace(/^:\s*/, '')
+    .trim();
+
+  // If the response starts with a common conjunction, clean it up
+  return cleanedText
+    .replace(/^(well,|so,|okay,|alright,|now,)\s+/i, '')
     .trim();
 }
 
