@@ -11,22 +11,30 @@ const DEFAULT_TWEAKS = {
 
 // Clean the response text by removing all AI-related prefixes and formatting
 function cleanResponse(text: string): string {
-  // Remove common prefixes and patterns
-  const cleanedText = text
-    // Remove any variation of AI/Assistant/Bot responses
-    .replace(/^(AI:|Assistant:|Bot:)\s*/i, '')
-    .replace(/\??\s*AI:?\s*/g, '')
-    // Remove question echoing
-    .replace(/^(User:?|Human:?|Q:?)\s*.+\?\s*/i, '')
+  // First, handle any full question repetition patterns
+  let cleanedText = text.replace(/^User:?\s*.*\?(.*)/i, '$1');
+
+  // Then clean up any remaining prefixes and patterns
+  cleanedText = cleanedText
+    // Remove any variation of prefixes
+    .replace(/^(AI:|Assistant:|Bot:|User:|Human:|Q:)\s*/gi, '')
+    .replace(/\??\s*(AI|User):?\s*/g, '')
     // Remove common question prefixes that might be echoed
     .replace(/^(what is|what are|what's|how do i|how to|tell me about|explain)\s+/i, '')
     // Remove any remaining colons at the start
     .replace(/^:\s*/, '')
+    // Remove common starting phrases
+    .replace(/^(well,|so,|okay,|alright,|now,|don't worry,)\s+/i, '')
+    // Clean up any leftover question marks and spaces at the start
+    .replace(/^\s*\?\s*/, '')
     .trim();
 
-  // If the response starts with a common conjunction, clean it up
+  // If we still have text starting with "I'm worried" or similar, clean it up
+  cleanedText = cleanedText.replace(/^I'm worried.*\?(.*)/i, '$1').trim();
+  
+  // Final cleanup of any remaining prefixes
   return cleanedText
-    .replace(/^(well,|so,|okay,|alright,|now,)\s+/i, '')
+    .replace(/^(well,|so,|okay,|alright,|now,|don't worry,)\s+/i, '')
     .trim();
 }
 
