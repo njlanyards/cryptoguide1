@@ -2,20 +2,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 
-const CRYPTO_TERMS = [
-  "Crypto",
-  "Bitcoin",
-  "Blockchain",
-  "Meme Coins",
-  "DeFi",
-  "Web3",
-  "Crypto Wallet",
-  "NFTs",
-  "Smart Contracts",
-  "Mining",
-  "Staking"
-];
-
 // Types
 interface Message {
   role: 'you' | 'guide';
