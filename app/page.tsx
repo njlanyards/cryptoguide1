@@ -34,7 +34,6 @@ export default function Home() {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [currentTermIndex, setCurrentTermIndex] = useState(0);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,14 +42,6 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTermIndex((prev) => (prev + 1) % CRYPTO_TERMS.length);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const runFlow = async (message: string): Promise<ChatResponse> => {
     const payload = {
