@@ -94,10 +94,10 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-10 p-4 shadow-sm">
         <div className="max-w-2xl mx-auto text-center px-4">
           <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-            Crypto Guide
+            Crypto Crumbs
           </h1>
           <p className="text-gray-600 text-sm md:text-base mt-1">
-            Your Friendly Crypto Assistant
+            Curious About Crypto? Ask Me Anything!
           </p>
         </div>
       </header>

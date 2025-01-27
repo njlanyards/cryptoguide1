@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Crypto Guide - Your Friendly Crypto Assistant",
-  description: "Learn about cryptocurrency, blockchain, and more with simple explanations",
+  title: "Crypto Crumbs - Your Friendly Crypto Guide",
+  description: "Curious about cryptocurrency? Ask anything about Bitcoin, blockchain, NFTs, and more!",
   icons: {
     icon: [
       { url: './icon.svg', type: 'image/svg+xml' },
