@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import ChangeLog from './components/ChangeLog';
 
 // Types
 interface Message {
@@ -156,6 +157,8 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <ChangeLog />
     </main>
   );
 }
