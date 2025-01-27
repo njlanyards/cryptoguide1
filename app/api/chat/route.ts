@@ -1,120 +1,114 @@
 import { NextResponse } from 'next/server';
 
 // System prompt for crypto mentoring
-const SYSTEM_PROMPT = `Act as a friendly crypto mentor who breaks down Bitcoin, blockchain, and crypto topics into 1 sentence answers using simple, relatable analogies (e.g., pop culture, everyday life). Assume the user has zero prior knowledge. Foster a no-judgment zone where every question is valid. Answer with 1 sentence at the most for all answers.
+const SYSTEM_PROMPT = `Act as a friendly crypto mentor who explains ALL crypto-related topics, including Bitcoin, blockchain, meme coins, NFTs, DeFi, and recent crypto trends. Break down answers into 1 sentence using simple, relatable analogies. Assume the user has zero prior knowledge and treat every question as valid.
 
 Rules:
+1. Answer ALL crypto-related questions, including questions about specific coins, trends, or news
+2. Use a warm, encouraging tone
+3. Keep answers to 1 sentence
+4. Use everyday analogies people can relate to
+5. Avoid technical jargon - use simple language
+6. For meme coins or trending topics, explain them objectively without judgment
+7. Only redirect with "Let's keep it crypto-focused" if the question is completely unrelated to cryptocurrency, blockchain, or digital assets
 
-Tone: Warm, encouraging, and street-smart.
+Example Responses:
 
-Analogies: Compare crypto concepts to everyday, real-world examples that people encounter in their daily lives. Use familiar scenarios like banking, shopping, or household items to make complex ideas easy to understand.
+Q: "What's a meme coin?"
+A: "Meme coins are cryptocurrencies inspired by internet jokes or trends, like Dogecoin which started as a dog meme but grew into a real digital currency."
 
-Example: "Blockchain is like a shared Google Doc where everyone can see changes, but no one can delete them."
+Q: "What's Bitcoin?"
+A: "Bitcoin is digital money that works like online gold - limited in supply and not controlled by any bank or government."
 
-Avoid jargon: Replace technical terms with everyday language.
+Q: "What are NFTs?"
+A: "NFTs are like digital collectible cards - each one is unique and proves you own something special on the internet."
 
-Instead of decentralized, say "no boss in charge."
+Goal: Help users understand ANY crypto topic quickly and clearly, whether it's traditional cryptocurrencies, meme coins, or the latest trends.`;
 
-Validate fears: Acknowledge risks without scaring users.
-
-"Crypto can feel wild, like betting on a NBA game—start small and learn the rules first."
-
-Off-topic? Respond: "Let's keep it crypto-focused! Ask me about Bitcoin, wallets, or meme coins."
-
-Goal: Make users feel smart, curious, and ready to learn—no gatekeeping, just "Oh, that's it?!" moments.`;
-
-// Clean the response text by removing all AI-related prefixes and formatting
 function cleanResponse(text: string): string {
-  // First, handle any full question repetition patterns
-  let cleanedText = text.replace(/^User:?\s*.*\?(.*)/i, '$1');
-
-  // Then clean up any remaining prefixes and patterns
-  cleanedText = cleanedText
-    // Remove any variation of prefixes
+  if (!text) return '';
+  
+  return text
+    .replace(/^User:?\s*.*\?(.*)/i, '$1')
     .replace(/^(AI:|Assistant:|Bot:|User:|Human:|Q:)\s*/gi, '')
     .replace(/\??\s*(AI|User):?\s*/g, '')
-    // Remove common question prefixes that might be echoed
     .replace(/^(what is|what are|what's|how do i|how to|tell me about|explain)\s+/i, '')
-    // Remove any remaining colons at the start
     .replace(/^:\s*/, '')
-    // Remove common starting phrases
     .replace(/^(well,|so,|okay,|alright,|now,|don't worry,)\s+/i, '')
-    // Clean up any leftover question marks and spaces at the start
     .replace(/^\s*\?\s*/, '')
-    .trim();
-
-  // If we still have text starting with "I'm worried" or similar, clean it up
-  cleanedText = cleanedText.replace(/^I'm worried.*\?(.*)/i, '$1').trim();
-  
-  // Final cleanup of any remaining prefixes
-  return cleanedText
+    .replace(/^I'm worried.*\?(.*)/i, '$1')
     .replace(/^(well,|so,|okay,|alright,|now,|don't worry,)\s+/i, '')
+    .replace(/\s*Confidence:\s*\d+%/gi, '')
     .trim();
 }
 
-/**
- * Run a chat completion with Groq
- */
-async function runGroqChat(message: string): Promise<any> {
-  if (!process.env.GROQ_API_KEY) {
-    throw new Error('GROQ_API_KEY is not defined');
+async function runGroqChat(message: string, conversationHistory: { role: string; content: string; }[]): Promise<any> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error('Missing GROQ_API_KEY environment variable');
   }
 
-  const response = await fetch('https://api.groq.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content: SYSTEM_PROMPT
-        },
-        {
-          role: "user",
-          content: message
-        }
-      ],
-      temperature: 0.2,
-      max_tokens: 150,
-      top_p: 1,
-      stream: false,
-      stop: null
-    }),
-  });
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "mixtral-8x7b-32768",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...conversationHistory.slice(-5),
+          { role: "user", content: message }
+        ],
+        temperature: 0.2,
+        max_tokens: 150,
+        top_p: 1,
+        stream: false
+      }),
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to get response from Groq: ${response.status}`);
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Groq API Error: ${response.status} - ${errorData}`);
+    }
+
+    const data = await response.json();
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response format from Groq API');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Groq API Error:', error);
+    throw error;
   }
-
-  return response.json();
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const data = await runGroqChat(body.message);
-    
-    // Extract the message from the response
-    let message = data?.choices?.[0]?.message?.content || 'No response from the assistant';
+    const { message, history = [] } = await request.json();
+    if (!message?.trim()) {
+      return NextResponse.json(
+        { result: 'Message is required', error: true },
+        { status: 400 }
+      );
+    }
 
-    // Clean the response
-    message = cleanResponse(message);
+    const data = await runGroqChat(message, history);
+    const cleanedMessage = cleanResponse(data.choices[0].message.content);
 
     return NextResponse.json({
-      result: message,
+      result: cleanedMessage,
       error: false
     });
   } catch (error) {
     console.error('API Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     return NextResponse.json(
-      { 
-        result: error instanceof Error ? error.message : 'An unexpected error occurred',
-        error: true 
-      },
+      { result: errorMessage, error: true },
       { status: 500 }
     );
   }
