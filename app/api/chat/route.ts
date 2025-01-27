@@ -1,5 +1,29 @@
 import { NextResponse } from 'next/server';
 
+// Types
+interface Message {
+  role: string;
+  content: string;
+}
+
+interface Choice {
+  message: Message;
+  index: number;
+  finish_reason: string;
+}
+
+interface GroqResponse {
+  id: string;
+  choices: Choice[];
+  created: number;
+  model: string;
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
 // System prompt for crypto mentoring
 const SYSTEM_PROMPT = `Act as a friendly crypto mentor who explains ALL crypto-related topics, including Bitcoin, blockchain, meme coins, NFTs, DeFi, and recent crypto trends. Break down answers into 1 sentence using simple, relatable analogies. Assume the user has zero prior knowledge and treat every question as valid.
 
@@ -42,49 +66,44 @@ function cleanResponse(text: string): string {
     .trim();
 }
 
-async function runGroqChat(message: string, conversationHistory: { role: string; content: string; }[]): Promise<any> {
+async function runGroqChat(message: string, conversationHistory: Message[]): Promise<GroqResponse> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw new Error('Missing GROQ_API_KEY environment variable');
   }
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "mixtral-8x7b-32768",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...conversationHistory.slice(-5),
-          { role: "user", content: message }
-        ],
-        temperature: 0.2,
-        max_tokens: 150,
-        top_p: 1,
-        stream: false
-      }),
-    });
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      model: "mixtral-8x7b-32768",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...conversationHistory.slice(-5),
+        { role: "user", content: message }
+      ],
+      temperature: 0.2,
+      max_tokens: 150,
+      top_p: 1,
+      stream: false
+    }),
+  });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`Groq API Error: ${response.status} - ${errorData}`);
-    }
-
-    const data = await response.json();
-    if (!data.choices?.[0]?.message?.content) {
-      throw new Error('Invalid response format from Groq API');
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Groq API Error:', error);
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`Groq API Error: ${response.status} - ${errorData}`);
   }
+
+  const data = await response.json();
+  if (!data.choices?.[0]?.message?.content) {
+    throw new Error('Invalid response format from Groq API');
+  }
+
+  return data;
 }
 
 export async function POST(request: Request) {
