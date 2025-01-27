@@ -38,6 +38,44 @@ function cleanResponse(text: string): string {
     .trim();
 }
 
+/**
+ * Run a flow with a given message and optional tweaks.
+ */
+async function runFlow(
+  message: string,
+  endpoint: string,
+  outputType: string = "chat",
+  inputType: string = "chat",
+  tweaks: Record<string, any> = DEFAULT_TWEAKS,
+  applicationToken: string
+): Promise<any> {
+  const apiUrl = `${process.env.LANGFLOW_BASE_URL}/lf/${process.env.LANGFLOW_ID}/api/v1/run/${endpoint}`;
+
+  const payload = {
+    input_value: message,
+    output_type: outputType,
+    input_type: inputType,
+    tweaks: tweaks
+  };
+
+  const headers = {
+    "Authorization": `Bearer ${applicationToken}`,
+    "Content-Type": "application/json"
+  };
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get response from assistant: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 if (!process.env.LANGFLOW_BASE_URL) throw new Error('LANGFLOW_BASE_URL is not defined');
 if (!process.env.LANGFLOW_ID) throw new Error('LANGFLOW_ID is not defined');
 if (!process.env.FLOW_ID) throw new Error('FLOW_ID is not defined');
@@ -46,32 +84,18 @@ if (!process.env.APPLICATION_TOKEN) throw new Error('APPLICATION_TOKEN is not de
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const endpoint = process.env.FLOW_ID;
-    const api_url = `${process.env.LANGFLOW_BASE_URL}/lf/${process.env.LANGFLOW_ID}/api/v1/run/${endpoint}`;
+    // We can safely assert these types since we check for them above
+    const endpoint = process.env.FLOW_ID!;
+    const applicationToken = process.env.APPLICATION_TOKEN!;
 
-    const payload = {
-      input_value: body.message,
-      output_type: "chat",
-      input_type: "chat",
-      tweaks: DEFAULT_TWEAKS
-    };
-
-    const response = await fetch(api_url, {
-      method: 'POST',
-      headers: {
-        "Authorization": `Bearer ${process.env.APPLICATION_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      throw new Error(`Failed to get response from assistant: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await runFlow(
+      body.message,
+      endpoint,
+      "chat",
+      "chat",
+      DEFAULT_TWEAKS,
+      applicationToken
+    );
     
     // Extract the message from the response
     let message = data?.outputs?.[0]?.outputs?.[0]?.results?.message?.text || 
