@@ -1,13 +1,27 @@
 import { NextResponse } from 'next/server';
 
-// Default tweaks matching the Python implementation
-const DEFAULT_TWEAKS = {
-  "ChatInput-bAJ4v": {},
-  "Prompt-GMTqC": {},
-  "GroqModel-41nqs": {},
-  "ChatOutput-fPDgJ": {},
-  "Memory-5wiMl": {}
-};
+// System prompt for crypto mentoring
+const SYSTEM_PROMPT = `Act as a friendly crypto mentor who breaks down Bitcoin, blockchain, and crypto topics into 1 sentence answers using simple, relatable analogies (e.g., pop culture, everyday life). Assume the user has zero prior knowledge. Foster a no-judgment zone where every question is valid. Answer with 1 sentence at the most for all answers.
+
+Rules:
+
+Tone: Warm, encouraging, and street-smart.
+
+Analogies: Compare crypto concepts to everyday, real-world examples that people encounter in their daily lives. Use familiar scenarios like banking, shopping, or household items to make complex ideas easy to understand.
+
+Example: "Blockchain is like a shared Google Doc where everyone can see changes, but no one can delete them."
+
+Avoid jargon: Replace technical terms with everyday language.
+
+Instead of decentralized, say "no boss in charge."
+
+Validate fears: Acknowledge risks without scaring users.
+
+"Crypto can feel wild, like betting on a NBA game—start small and learn the rules first."
+
+Off-topic? Respond: "Let's keep it crypto-focused! Ask me about Bitcoin, wallets, or meme coins."
+
+Goal: Make users feel smart, curious, and ready to learn—no gatekeeping, just "Oh, that's it?!" moments.`;
 
 // Clean the response text by removing all AI-related prefixes and formatting
 function cleanResponse(text: string): string {
@@ -39,68 +53,53 @@ function cleanResponse(text: string): string {
 }
 
 /**
- * Run a flow with a given message and optional tweaks.
+ * Run a chat completion with Groq
  */
-async function runFlow(
-  message: string,
-  endpoint: string,
-  outputType: string = "chat",
-  inputType: string = "chat",
-  tweaks: Record<string, any> = DEFAULT_TWEAKS,
-  applicationToken: string
-): Promise<any> {
-  const apiUrl = `${process.env.LANGFLOW_BASE_URL}/lf/${process.env.LANGFLOW_ID}/api/v1/run/${endpoint}`;
+async function runGroqChat(message: string): Promise<any> {
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY is not defined');
+  }
 
-  const payload = {
-    input_value: message,
-    output_type: outputType,
-    input_type: inputType,
-    tweaks: tweaks
-  };
-
-  const headers = {
-    "Authorization": `Bearer ${applicationToken}`,
-    "Content-Type": "application/json"
-  };
-
-  const response = await fetch(apiUrl, {
+  const response = await fetch('https://api.groq.com/v1/chat/completions', {
     method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
+    headers: {
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: SYSTEM_PROMPT
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ],
+      temperature: 0.2,
+      max_tokens: 150,
+      top_p: 1,
+      stream: false,
+      stop: null
+    }),
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to get response from assistant: ${response.status}`);
+    throw new Error(`Failed to get response from Groq: ${response.status}`);
   }
 
   return response.json();
 }
 
-if (!process.env.LANGFLOW_BASE_URL) throw new Error('LANGFLOW_BASE_URL is not defined');
-if (!process.env.LANGFLOW_ID) throw new Error('LANGFLOW_ID is not defined');
-if (!process.env.FLOW_ID) throw new Error('FLOW_ID is not defined');
-if (!process.env.APPLICATION_TOKEN) throw new Error('APPLICATION_TOKEN is not defined');
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    // We can safely assert these types since we check for them above
-    const endpoint = process.env.FLOW_ID!;
-    const applicationToken = process.env.APPLICATION_TOKEN!;
-
-    const data = await runFlow(
-      body.message,
-      endpoint,
-      "chat",
-      "chat",
-      DEFAULT_TWEAKS,
-      applicationToken
-    );
+    const data = await runGroqChat(body.message);
     
     // Extract the message from the response
-    let message = data?.outputs?.[0]?.outputs?.[0]?.results?.message?.text || 
-                 data?.outputs?.[0]?.outputs?.[0]?.artifacts?.message ||
-                 'No response from the assistant';
+    let message = data?.choices?.[0]?.message?.content || 'No response from the assistant';
 
     // Clean the response
     message = cleanResponse(message);
