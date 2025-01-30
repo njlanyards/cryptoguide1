@@ -179,7 +179,7 @@ export default function Home() {
           
           <div className="prose lg:prose-lg">
             <p className="lead-paragraph text-xl mb-8">
-              Whether you're new to crypto or looking to deepen your understanding, this comprehensive guide covers everything from Bitcoin basics to advanced blockchain concepts. Learn how to invest safely, understand crypto mining, and navigate the exciting world of digital assets.
+              Whether you&apos;re new to crypto or looking to deepen your understanding, this comprehensive guide covers everything from Bitcoin basics to advanced blockchain concepts. Learn how to invest safely, understand crypto mining, and navigate the exciting world of digital assets.
             </p>
 
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl mb-12">
@@ -257,7 +257,7 @@ export default function Home() {
             <section id="investing" className="mb-12">
               <h2 className="text-3xl font-semibold mb-6">Smart Crypto Investment Strategies</h2>
               <p className="mb-4">
-                Learning how to invest in crypto requires understanding market dynamics, reading crypto charts, and implementing sound investment strategies. Here's what you need to know about making informed investment decisions.
+                Learning how to invest in crypto requires understanding market dynamics, reading crypto charts, and implementing sound investment strategies. Here&apos;s what you need to know about making informed investment decisions.
               </p>
 
               <div className="grid md:grid-cols-3 gap-6 my-8">
@@ -291,7 +291,7 @@ export default function Home() {
             <section id="mining" className="mb-12">
               <h2 className="text-3xl font-semibold mb-6">Understanding Cryptocurrency Mining</h2>
               <p className="mb-4">
-                Cryptocurrency mining is the process of validating transactions and adding them to the blockchain while earning rewards. Whether you're interested in Bitcoin mining or other cryptocurrencies, understanding the basics is essential.
+                Cryptocurrency mining is the process of validating transactions and adding them to the blockchain while earning rewards. Whether you&apos;re interested in Bitcoin mining or other cryptocurrencies, understanding the basics is essential.
               </p>
 
               <div className="bg-gray-50 p-6 rounded-lg my-8">
