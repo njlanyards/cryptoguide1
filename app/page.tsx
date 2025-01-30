@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import ChangeLog from './components/ChangeLog';
 
@@ -22,13 +22,13 @@ interface ApiMessage {
 export default function Home() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'guide', content: "Ask me anything about crypto! For example: 'What's a wallet?' or 'How do I buy Bitcoin?'" }
+    { role: 'guide', content: "Ask me anything about crypto! For example: &apos;What&apos;s a wallet?&apos; or &apos;How do I buy Bitcoin?&apos;" }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(false);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (shouldScroll && messagesEndRef.current) {
       const chatContainer = messagesEndRef.current.parentElement;
       if (chatContainer) {
@@ -36,7 +36,7 @@ export default function Home() {
       }
       setShouldScroll(false);
     }
-  };
+  }, [shouldScroll]);
 
   useEffect(() => {
     if (messages.length > 1 || isLoading) {
@@ -46,7 +46,7 @@ export default function Home() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [shouldScroll]);
+  }, [scrollToBottom]);
 
   // Convert UI messages to API format
   const getApiMessages = (msgs: Message[]): ApiMessage[] => {
