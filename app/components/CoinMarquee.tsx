@@ -1,37 +1,29 @@
 'use client';
 import Script from 'next/script';
 
+interface GeckoCoinPriceMarqueeWidgetAttributes {
+  coinIds: string;
+  currency: string;
+  locale: string;
+}
+
 declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'gecko-coin-price-marquee-widget': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        locale?: string;
-        'transparent-background'?: string;
-        outlined?: string;
-        'coin-ids'?: string;
-        'initial-currency'?: string;
-      };
-    }
+  interface HTMLElementTagNameMap {
+    'gecko-coin-price-marquee-widget': HTMLElement & GeckoCoinPriceMarqueeWidgetAttributes;
   }
 }
 
 export default function CoinMarquee() {
-  const widgetHtml = `
-    <gecko-coin-price-marquee-widget 
-      locale="en" 
-      transparent-background="true" 
-      outlined="true" 
-      coin-ids="bitcoin,ethereum,binancecoin,solana,cardano,ripple" 
-      initial-currency="usd">
-    </gecko-coin-price-marquee-widget>
-  `;
-
   return (
-    <div className="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto">
-        <Script src="https://widgets.coingecko.com/gecko-coin-price-marquee-widget.js" />
-        <div dangerouslySetInnerHTML={{ __html: widgetHtml }} />
-      </div>
+    <div className="w-full bg-white/30 backdrop-blur border-b border-gray-200">
+      <div dangerouslySetInnerHTML={{
+        __html: `<gecko-coin-price-marquee-widget 
+          coin-ids="bitcoin,ethereum,ripple,dogecoin" 
+          currency="usd" 
+          locale="en"
+        ></gecko-coin-price-marquee-widget>`
+      }} />
+      <Script src="https://widgets.coingecko.com/coingecko-coin-price-marquee-widget.js" />
     </div>
   );
 } 
