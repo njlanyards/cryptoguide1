@@ -2,6 +2,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import ChangeLog from './components/ChangeLog';
+import CoinMarquee from './components/CoinMarquee';
+import CryptoNews from './components/CryptoNews';
 
 // Types
 interface Message {
@@ -106,7 +108,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
-      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-10 p-4 shadow-sm">
+      <CoinMarquee />
+      <header className="bg-white/80 backdrop-blur-sm z-10 p-4 shadow-sm">
         <div className="max-w-2xl mx-auto text-center px-4">
           <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
             Crypto Crumbs
@@ -117,7 +120,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="flex-1 mt-[100px] px-4 pb-4">
+      <div className="flex-1 px-4 pb-4 pt-8">
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="flex-1 overflow-y-auto max-h-[65vh] md:max-h-[70vh] scroll-smooth p-4">
@@ -331,6 +334,7 @@ export default function Home() {
                     <li>Layer-2 scaling solutions</li>
                   </ul>
                 </div>
+                <CryptoNews />
               </div>
             </section>
 
