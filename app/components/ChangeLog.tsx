@@ -16,6 +16,16 @@ const changes = [
       'Enhanced response cleaning for better readability',
       'Added Change Log for transparency'
     ]
+  },
+  {
+    date: '2025-01-30',
+    version: '1.0.2',
+    changes: [
+      'Added SEO-optimized educational content',
+      'Improved chat scroll behavior for better user experience',
+      'Enhanced metadata for better search engine visibility',
+      'Added structured content sections with quick navigation'
+    ]
   }
 ];
 
