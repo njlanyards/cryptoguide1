@@ -22,7 +22,7 @@ interface ApiMessage {
 export default function Home() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'guide', content: "Ask me anything about crypto! For example: &apos;What&apos;s a wallet?&apos; or &apos;How do I buy Bitcoin?&apos;" }
+    { role: 'guide', content: 'Ask me anything about crypto! For example: "What\'s a wallet?" or "How do I buy Bitcoin?"' }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
