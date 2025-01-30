@@ -1,45 +1,50 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+
+interface GeckoCoinPriceMarqueeWidgetAttributes {
+  'coin-ids': string;
+  'locale': string;
+  'transparent-background': string;
+  'outlined': string;
+  'initial-currency': string;
+}
 
 declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'gecko-coin-price-marquee-widget': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        locale?: string;
-        'transparent-background'?: string;
-        outlined?: string;
-        'coin-ids'?: string;
-        'initial-currency'?: string;
-      };
-    }
+  interface HTMLElementTagNameMap {
+    'gecko-coin-price-marquee-widget': HTMLElement & GeckoCoinPriceMarqueeWidgetAttributes;
   }
 }
 
 export default function CoinMarquee() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    // Load CoinGecko widget script
+    if (!containerRef.current) return;
+
+    // Create script element
     const script = document.createElement('script');
-    script.src = 'https://widgets.coingecko.com/gecko-coin-price-marquee-widget.js';
+    script.src = 'https://widgets.coingecko.com/coingecko-coin-price-marquee-widget.js';
     script.async = true;
+
+    // Create widget element
+    const widget = document.createElement('gecko-coin-price-marquee-widget');
+    widget.setAttribute('coin-ids', 'bitcoin,ethereum,solana,cardano');
+    widget.setAttribute('locale', 'en');
+    widget.setAttribute('transparent-background', 'true');
+    widget.setAttribute('outlined', 'true');
+    widget.setAttribute('initial-currency', 'usd');
+
+    // Add elements to container
+    containerRef.current.appendChild(widget);
     document.body.appendChild(script);
 
     return () => {
-      // Cleanup script when component unmounts
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
       document.body.removeChild(script);
     };
   }, []);
 
-  return (
-    <div className="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto">
-        <gecko-coin-price-marquee-widget 
-          locale="en" 
-          transparent-background="true" 
-          outlined="true" 
-          coin-ids="bitcoin,ethereum,binancecoin,solana,cardano,ripple" 
-          initial-currency="usd"
-        ></gecko-coin-price-marquee-widget>
-      </div>
-    </div>
-  );
+  return <div ref={containerRef} className="w-full" />;
 } 
