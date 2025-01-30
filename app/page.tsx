@@ -109,7 +109,7 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
       <CoinMarquee />
-      <header className="bg-white/80 backdrop-blur-sm z-10 p-4 shadow-sm">
+      <header className="bg-white/80 backdrop-blur-sm p-4 shadow-sm">
         <div className="max-w-2xl mx-auto text-center px-4">
           <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
             Crypto Crumbs

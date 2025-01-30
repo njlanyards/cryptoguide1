@@ -57,6 +57,46 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'www.newsbtc.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.marketbeat.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'marketbeat.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.cointelegraph.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'static.news.bitcoin.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'crypto.news',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.crypto.news',
+      },
+      {
+        protocol: 'https',
+        hostname: 'u.today',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.u.today',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cryptopotato.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.cryptopotato.com',
       }
     ],
   },

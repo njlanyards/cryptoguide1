@@ -24,7 +24,9 @@ const changes = [
       'Added SEO-optimized educational content',
       'Improved chat scroll behavior for better user experience',
       'Enhanced metadata for better search engine visibility',
-      'Added structured content sections with quick navigation'
+      'Added structured content sections with quick navigation',
+      'Added Crypto News widget',
+      'Added Coin Marquee widget'
     ]
   }
 ];
